@@ -1,34 +1,30 @@
 const express = require('express');
 const { MongoClient } = require('mongodb');
+const config = require('./config');
 
 const app = express();
-const port = 9000;
+const port = config.server.port;
 
-const localurl = 'http://localhost:27017/';
-const uri = "mongodb+srv://kalppatel1209:kalp5121@cluster0.g4rus.mongodb.net/"; 
-const dbName = "codinggita";
-
+const { remoteUri: uri, dbName } = config.database;
 
 app.use(express.json());
 
 let db, students;
 
-
 async function initializeDatabase() {
     try {
-        const client = await MongoClient.connect(uri , { useUnifiedTopology: true });
+        const client = await MongoClient.connect(uri, { useUnifiedTopology: true });
         console.log("Connected to MongoDB");
 
         db = client.db(dbName);
         students = db.collection("students");
 
-        
         app.listen(port, () => {
             console.log(`Server running at http://localhost:${port}`);
         });
     } catch (err) {
         console.error("Error connecting to MongoDB:", err);
-        process.exit(1); 
+        process.exit(1);
     }
 }
 
@@ -82,8 +78,7 @@ app.patch('/students/:rollNumber', async (req, res) => {
     }
 });
 
-
-
+// DELETE: Remove a student
 app.delete('/students/:rollNumber', async (req, res) => {
     try {
         const rollNumber = parseInt(req.params.rollNumber);
